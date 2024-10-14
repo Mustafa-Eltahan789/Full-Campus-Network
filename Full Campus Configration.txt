@@ -1,0 +1,758 @@
+Router:
+
+hostname Router
+!
+interface GigabitEthernet0/0
+ ip address 192.168.2.1 255.255.255.252
+ ip nat inside
+ ip virtual-reassembly in
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/1
+ ip address 192.168.2.5 255.255.255.252
+ ip nat inside
+ ip virtual-reassembly in
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/2
+ ip address dhcp
+ ip nat outside
+ ip virtual-reassembly in
+ duplex auto
+ speed auto
+ media-type rj45
+!
+router ospf 1
+ router-id 10.10.10.10
+ network 192.168.0.0 0.0.255.255 area 0
+ default-information originate
+!
+ip nat inside source list 1 interface GigabitEthernet0/2 overload
+!
+access-list 1 permit 192.168.0.0 0.0.255.255
+!
+line con 0
+ logging synchronous
+!
+-------------------------------------------------------------------------------------------------------------------
+Core1:
+
+!
+hostname Core1
+!
+interface Port-channel21
+ no switchport
+ ip address 192.168.2.33 255.255.255.252
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 192.168.2.49 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ no switchport
+ ip address 192.168.2.53 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ no switchport
+ ip address 192.168.2.9 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ no switchport
+ ip address 192.168.2.13 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ no switchport
+ no ip address
+ negotiation auto
+ channel-group 21 mode desirable
+!
+interface GigabitEthernet1/1
+ no switchport
+ no ip address
+ negotiation auto
+ channel-group 21 mode desirable
+!
+interface GigabitEthernet1/2
+ no switchport
+ ip address 192.168.2.2 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ no switchport
+ ip address 192.168.2.37 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+router ospf 1
+ router-id 1.1.1.1
+ network 192.168.0.0 0.0.255.255 area 0
+!
+line con 0
+ logging synchronous
+!
+---------------------------------------------------------------------------------------------------------------------------
+Core2:
+
+!
+hostname Core2
+!
+interface Port-channel21
+ no switchport
+ ip address 192.168.2.34 255.255.255.252
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 192.168.2.21 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ no switchport
+ ip address 192.168.2.17 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ no switchport
+ ip address 192.168.2.29 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ no switchport
+ ip address 192.168.2.25 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ no switchport
+ no ip address
+ negotiation auto
+ channel-group 21 mode desirable
+!
+interface GigabitEthernet1/1
+ no switchport
+ no ip address
+ negotiation auto
+ channel-group 21 mode desirable
+!
+interface GigabitEthernet1/2
+ no switchport
+ ip address 192.168.2.6 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ no switchport
+ ip address 192.168.2.41 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ negotiation auto
+!
+interface GigabitEthernet2/1
+ negotiation auto
+!
+router ospf 1
+ router-id 2.2.2.2
+ network 192.168.0.0 0.0.255.255 area 0
+!
+line con 0
+ logging synchronous
+!
+--------------------------------------------------------------------------------------------------------------------------
+Dist1:
+
+!
+hostname Dist1
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 10,20 priority 24576
+spanning-tree vlan 30,40 priority 28672
+!
+interface Port-channel19
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 192.168.2.50 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ no switchport
+ ip address 192.168.2.18 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 19 mode active
+!
+interface GigabitEthernet0/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 19 mode active
+!
+interface GigabitEthernet1/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface Vlan10
+ ip address 192.168.10.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 10 ip 192.168.10.254
+ standby 10 priority 150
+ standby 10 preempt
+ standby 10 authentication md5 key-string cisco123
+!
+interface Vlan20
+ ip address 192.168.20.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 20 ip 192.168.20.254
+ standby 20 priority 150
+ standby 20 preempt
+ standby 20 authentication md5 key-string cisco123
+!
+interface Vlan30
+ ip address 192.168.30.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 30 ip 192.168.30.254
+ standby 30 preempt
+ standby 30 authentication md5 key-string cisco123
+!
+interface Vlan40
+ ip address 192.168.40.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 40 ip 192.168.40.254
+ standby 40 preempt
+ standby 40 authentication md5 key-string cisco123
+!
+router ospf 1
+ router-id 0.0.0.1
+ network 192.168.0.0 0.0.255.255 area 0
+!
+line con 0
+ logging synchronous
+!
+vlan 10,20,30,40
+----------------------------------------------------------------------------------------------------------------------
+Dist2:
+
+!
+hostname Dist2
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 10,20 priority 28672
+spanning-tree vlan 30,40 priority 24576
+!
+interface Port-channel19
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 192.168.2.22 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ no switchport
+ ip address 192.168.2.54 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 19 mode active
+!
+interface GigabitEthernet0/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 19 mode active
+!
+interface GigabitEthernet1/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface Vlan10
+ ip address 192.168.10.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 10 ip 192.168.10.254
+ standby 10 preempt
+ standby 10 authentication md5 key-string cisco123
+!
+interface Vlan20
+ ip address 192.168.20.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 20 ip 192.168.20.254
+ standby 20 preempt
+ standby 20 authentication md5 key-string cisco123
+!
+interface Vlan30
+ ip address 192.168.30.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 30 ip 192.168.30.254
+ standby 30 priority 150
+ standby 30 preempt
+ standby 30 authentication md5 key-string cisco123
+!
+interface Vlan40
+ ip address 192.168.40.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ standby 40 ip 192.168.40.254
+ standby 40 priority 150
+ standby 40 preempt
+ standby 40 authentication md5 key-string cisco123
+!
+router ospf 1
+ router-id 0.0.0.2
+ network 192.168.0.0 0.0.255.255 area 0
+!
+line con 0
+ logging synchronous
+!
+------------------------------------------------------------------------------------------------------------------------
+Dist3:
+
+!
+hostname Dist3
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 50,60 priority 24576
+spanning-tree vlan 70,80 priority 28672
+!
+interface Port-channel34
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface GigabitEthernet0/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 34 mode desirable
+!
+interface GigabitEthernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 34 mode desirable
+!
+interface GigabitEthernet0/2
+ no switchport
+ ip address 192.168.2.10 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ no switchport
+ ip address 192.168.2.26 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface Vlan50
+ ip address 192.168.50.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 50 ip 192.168.50.254
+ vrrp 50 priority 150
+ vrrp 50 authentication text cisco123
+!
+interface Vlan60
+ ip address 192.168.60.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 60 ip 192.168.60.254
+ vrrp 60 priority 150
+ vrrp 60 authentication text cisco123
+!
+interface Vlan70
+ ip address 192.168.70.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 70 ip 192.168.70.254
+ vrrp 70 authentication text cisco123
+!
+interface Vlan80
+ ip address 192.168.80.251 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 80 ip 192.168.80.254
+ vrrp 80 authentication text cisco123
+!
+router ospf 1
+ router-id 0.0.0.3
+ network 192.168.0.0 0.0.255.255 area 0
+!
+line con 0
+ logging synchronous
+!
+vlan 50,60,70,80
+----------------------------------------------------------------------------------------------------------------------------
+Dist4:
+
+!
+hostname Dist4
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 50,60 priority 28672
+spanning-tree vlan 70,80 priority 24576
+!
+interface Port-channel34
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface GigabitEthernet0/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 34 mode desirable
+!
+interface GigabitEthernet0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+ channel-group 34 mode desirable
+!
+interface GigabitEthernet0/2
+ no switchport
+ ip address 192.168.2.30 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ no switchport
+ ip address 192.168.2.14 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ negotiation auto
+!
+interface Vlan50
+ ip address 192.168.50.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 50 ip 192.168.50.254
+ vrrp 50 authentication text cisco123
+!
+interface Vlan60
+ ip address 192.168.60.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 60 ip 192.168.60.254
+ vrrp 60 authentication text cisco123
+!
+interface Vlan70
+ ip address 192.168.70.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 70 ip 192.168.70.254
+ vrrp 70 priority 150
+ vrrp 70 authentication text cisco123
+!
+interface Vlan80
+ ip address 192.168.80.252 255.255.255.0
+ ip helper-address 192.168.2.46
+ vrrp 80 ip 192.168.80.254
+ vrrp 80 priority 150
+ vrrp 80 authentication text cisco123
+!
+router ospf 1
+ router-id 0.0.0.4
+ network 192.168.0.0 0.0.255.255 area 0
+!
+line con 0
+ logging synchronous
+!
+-----------------------------------------------------------------------------------------------------------------------------
+Access1:
+
+!
+hostname Access1
+!
+spanning-tree mode rapid-pvst
+spanning-tree portfast edge bpduguard default
+spanning-tree extend system-id
+!
+interface GigabitEthernet0/0
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0050.7966.680f
+ switchport port-security
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security
+ negotiation auto
+!
+line con 0
+ logging synchronous
+!
+------------------------------------------------------------------------------------------------------------------------
+Access2:
+
+!
+hostname Access2
+!
+spanning-tree mode rapid-pvst
+spanning-tree portfast edge bpduguard default
+spanning-tree extend system-id
+!
+interface GigabitEthernet0/0
+ switchport access vlan 20
+ switchport mode access
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ switchport access vlan 10
+ switchport mode access
+ negotiation auto
+!
+line con 0
+ logging synchronous
+!
+--------------------------------------------------------------------------------------------------------------------
+Access6:
+
+!
+hostname Access6
+!
+spanning-tree mode rapid-pvst
+spanning-tree portfast edge bpduguard default
+spanning-tree extend system-id
+!
+interface GigabitEthernet0/0
+ switchport access vlan 60
+ switchport mode access
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ switchport access vlan 50
+ switchport mode access
+ negotiation auto
+!
+line con 0
+ logging synchronous
+!
+---------------------------------------------------------------------------------------------------------------------------
+Access7:
+
+!
+hostname Access7
+!
+spanning-tree mode rapid-pvst
+spanning-tree portfast edge bpduguard default
+spanning-tree extend system-id
+!
+interface GigabitEthernet0/0
+ switchport access vlan 50
+ switchport mode access
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ switchport access vlan 70
+ switchport mode access
+ negotiation auto
+!
+line con 0
+ logging synchronous
+!
+----------------------------------------------------------------------------------------------------------------------------
+Access8:
+
+!
+hostname Access8
+!
+spanning-tree mode rapid-pvst
+spanning-tree portfast edge bpduguard default
+spanning-tree extend system-id
+!
+interface GigabitEthernet0/0
+ switchport access vlan 70
+ switchport mode access
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ switchport access vlan 80
+ switchport mode access
+ negotiation auto
+!
+line con 0
+ logging synchronous
+!
+----------------------------------------------------------------------------------------------------------------------------
+Switch:
+
+!
+hostname Switch
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 192.168.2.45 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ no switchport
+ ip address 192.168.2.42 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ no switchport
+ ip address 192.168.2.38 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+router ospf 1
+!
+line con 0
+ logging synchronous
+!
+--------------------------------------------------------------------------------------------------------------------------
+DHCP:
+
+!
+hostname DHCP
+!
+ip dhcp excluded-address 192.168.50.251 192.168.50.254
+ip dhcp excluded-address 192.168.60.251 192.168.60.254
+ip dhcp excluded-address 192.168.70.251 192.168.70.254
+ip dhcp excluded-address 192.168.80.251 192.168.80.254
+ip dhcp excluded-address 192.168.10.251 192.168.10.254
+ip dhcp excluded-address 192.168.20.251 192.168.20.254
+ip dhcp excluded-address 192.168.30.251 192.168.30.254
+ip dhcp excluded-address 192.168.40.251 192.168.40.254
+!
+ip dhcp pool VLAN10
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.254
+ dns-server 8.8.8.8
+!
+ip dhcp pool VLAN20
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+ip dhcp pool VLAN30
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+ip dhcp pool VLAN40
+ network 192.168.40.0 255.255.255.0
+ default-router 192.168.40.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+ip dhcp pool VLAN50
+ network 192.168.50.0 255.255.255.0
+ default-router 192.168.50.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+ip dhcp pool VLAN60
+ network 192.168.60.0 255.255.255.0
+ default-router 192.168.60.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+ip dhcp pool VLAN70
+ network 192.168.70.0 255.255.255.0
+ default-router 192.168.70.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+ip dhcp pool VLAN80
+ network 192.168.80.0 255.255.255.0
+ default-router 192.168.80.254
+ dns-server 8.8.8.8 4.4.4.4
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 192.168.2.46 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+!
+!
+router ospf 1
+!
+line con 0
+ logging synchronous
+!
